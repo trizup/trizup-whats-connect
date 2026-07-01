@@ -1,0 +1,18 @@
+{
+  "name": "whatsapp-web-session-importer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild ./vendor/wa-store-migrate-entry.mjs --bundle --platform=browser --format=iife --global-name=WAStoreMigrate --inject:./vendor/buffer-shim.mjs --alias:node:crypto=./vendor/node-crypto-browser-shim.mjs --alias:node:util=./vendor/node-util-browser-shim.mjs --minify --outfile=./vendor/wa-store-migrate.bundle.js && node -e \"const fs=require('fs');const p='./vendor/wa-store-migrate.bundle.js';let s=fs.readFileSync(p,'utf8');s=s.replace('eval(\\\"quire\\\".replace(/^/, \\\"re\\\"))(moduleName)','null').replace('eval(\\\"quire\\\".replace(/^/,\\\"re\\\"))(moduleName)','null');fs.writeFileSync(p,s);\"",
+    "dist": "npm run build && rm -rf dist && mkdir -p dist/vendor && cp manifest.json background.js autofill.js dist/ && cp vendor/wa-store-migrate.bundle.js dist/vendor/",
+    "zip": "rm -f whatsapp-web-session-importer.zip && npm run dist && cd dist && zip -qr ../whatsapp-web-session-importer.zip ."
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "wa-store-migrate": "0.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  }
+}

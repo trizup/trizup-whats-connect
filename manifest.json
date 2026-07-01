@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Session Connector",
+  "version": "0.1.0",
+  "description": "Connects an authenticated WhatsApp Web session to your API.",
+  "action": {
+    "default_title": "Abrir importador"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*.uazapi.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["autofill.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
