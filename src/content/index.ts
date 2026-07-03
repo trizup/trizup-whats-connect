@@ -242,6 +242,7 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       "historyOnlyButton",
       "mainDumpButton",
       "exitDevModeButton",
+      "tokenClearButton",
       "tokenVisibilityButton",
       "settingsButton",
       "autoOpenCheckbox",
@@ -394,7 +395,8 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       serverUrlInput.value = values[STORAGE_KEYS.serverUrl] || "";
     }
     if (instanceTokenInput) {
-      instanceTokenInput.value = state.pendingAutofillToken || (state.userSettings.saveToken ? values[STORAGE_KEYS.instanceToken] || "" : "");
+      const pendingToken = state.pendingAutofillToken;
+      instanceTokenInput.value = pendingToken || (state.userSettings.saveToken ? values[STORAGE_KEYS.instanceToken] || "" : "");
     }
     if (includeHistoryCheckbox) {
       includeHistoryCheckbox.checked = values[STORAGE_KEYS.includeHistory] === undefined
@@ -421,6 +423,17 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       [STORAGE_KEYS.disconnectLocal]: state.devMode ? disconnectLocalCheckbox?.checked !== false : true
     });
     renderCleanupNotice();
+  }
+
+  async function clearToken() {
+    state.pendingAutofillToken = "";
+    const input = panelEl("instanceTokenInput");
+    if (input) {
+      input.value = "";
+    }
+    setTokenVisible(false);
+    await storageSet({ [STORAGE_KEYS.instanceToken]: "" });
+    input?.focus();
   }
 
   function closeImportPort() {
@@ -522,7 +535,7 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       return;
     }
     if (!client || !token) {
-      setResult("Informe cliente e token da instância.", "error");
+      setResult("Informe o nome da assinatura e o token.", "error");
       return;
     }
 
@@ -545,7 +558,7 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       return;
     }
     if (!client || !token) {
-      setResult("Informe cliente e token da instância.", "error");
+      setResult("Informe o nome da assinatura e o token.", "error");
       return;
     }
 
@@ -602,6 +615,9 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
       setTokenVisible(input?.type === "password");
       input?.focus();
     });
+    panelEl("tokenClearButton")?.addEventListener("click", () => {
+      clearToken().catch((error) => warnIfActiveContext("Failed to clear token", error));
+    });
     panelEl("diagnoseButton")?.addEventListener("click", () => {
       runBackgroundCommand(BACKGROUND_COMMANDS.diagnose, {}, "Diagnóstico gerado.");
     });
@@ -653,6 +669,7 @@ import { PANEL_HOST_ID, PANEL_TEXT, panelTemplate } from "./panel/template";
     }
     state.host.style.display = "";
     refreshLoginStatus();
+    state.pendingAutofillToken = "";
     return true;
   }
 

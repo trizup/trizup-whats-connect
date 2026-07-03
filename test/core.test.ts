@@ -15,15 +15,15 @@ import {
 } from "../src/shared/url";
 
 describe("URL helpers", () => {
-  it("normalizes client slugs, hosts, local hosts, and full URLs", () => {
-    expect(normalizeBaseUrl("cliente")).toBe("https://cliente.uazapi.com");
+  it("normalizes subscription slugs, hosts, local hosts, and full URLs", () => {
+    expect(normalizeBaseUrl("minha-loja")).toBe("https://minha-loja.uazapi.com");
     expect(normalizeBaseUrl("api.example.com")).toBe("https://api.example.com");
     expect(normalizeBaseUrl("localhost:3000/")).toBe("http://localhost:3000");
     expect(normalizeBaseUrl("https://api.example.com/")).toBe("https://api.example.com");
   });
 
-  it("rejects invalid client hosts", () => {
-    expect(() => normalizeClientHost("bad host")).toThrow("Cliente invalido");
+  it("rejects invalid subscription hosts", () => {
+    expect(() => normalizeClientHost("bad host")).toThrow("Nome da assinatura invalido");
   });
 });
 

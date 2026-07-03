@@ -1,8 +1,11 @@
 // @ts-nocheck
 
 // Serialized into the WhatsApp Web page; keep this function self-contained.
-export function extractWhatsAppWebSidecarDump() {
-  const HISTORY_CHAT_LIMIT = 5000;
+export function extractWhatsAppWebSidecarDump(options = {}) {
+  const configuredHistoryChatLimit = Number(options?.historyChatLimit);
+  const HISTORY_CHAT_LIMIT = Number.isFinite(configuredHistoryChatLimit) && configuredHistoryChatLimit >= 0
+    ? Math.floor(configuredHistoryChatLimit)
+    : 5000;
   const LIMITS = {
     contacts: 15000,
     chats: 10000,

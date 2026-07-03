@@ -32,15 +32,17 @@ sequenceDiagram
   Panel->>BG: START_IMPORT via port session-import
   BG->>WA: injeta scripts de captura
   BG->>API: /start, /chunk, /finish
+  API-->>BG: finish ok
   BG->>WA: limpa sessão local
-  BG->>API: /instance/connect
+  BG->>Panel: DONE
+  BG->>WA: recarrega aba após confirmação
 ```
 
 ## Arquivos principais
 
 - `src/customization.ts`: primeira parada para forks. Textos, domínio, endpoints, header de auth, limites e hosts da bridge.
 - `src/shared/config.ts`: constantes derivadas da customização.
-- `src/shared/url.ts`: normalização de cliente/domínio e leitura do hash `#client=&token=`.
+- `src/shared/url.ts`: normalização do nome da assinatura/domínio e leitura do hash `#client=&token=`.
 - `src/content/index.ts`: painel dentro do WhatsApp Web.
 - `src/content/app-bridge.ts`: bridge opcional para páginas do SaaS via `postMessage`.
 - `src/background/index.ts`: orquestração da importação.
@@ -67,9 +69,10 @@ Use **Carregar sem compactação** e selecione a pasta `dist`.
 
 Sempre que alterar `src/`, rode `npm run build` novamente e clique em **Reload** na extensão.
 
-## Como o cliente vira URL da API
+## Como a assinatura vira URL da API
 
-O campo `client` pode receber um nome curto, um host ou uma URL completa.
+O campo exibido como "Nome da assinatura" usa o parâmetro interno `client`.
+Ele pode receber um nome curto, um host ou uma URL completa.
 
 Exemplos:
 
@@ -105,7 +108,6 @@ POST /instance/import-web-session/start
 POST /instance/import-web-session/chunk
 POST /instance/import-web-session/finish
 POST /instance/import-web-session/history
-POST /instance/connect
 ```
 
 Esses paths vêm de:
@@ -118,8 +120,7 @@ api: {
     importWebSessionStart: "/instance/import-web-session/start",
     importWebSessionChunk: "/instance/import-web-session/chunk",
     importWebSessionFinish: "/instance/import-web-session/finish",
-    importWebSessionHistory: "/instance/import-web-session/history",
-    instanceConnect: "/instance/connect"
+    importWebSessionHistory: "/instance/import-web-session/history"
   }
 }
 ```
@@ -237,14 +238,13 @@ Para adaptar para outra API, o caminho mais simples é trocar
 `api.paths.importWebSessionHistory` em `src/customization.ts` e ajustar
 `uploadHistoryOnlyPayload` em `src/background/api.ts`.
 
-### 6. Limpar sessão local e conectar
+### 6. Limpar sessão local
 
 Depois do histórico, ou depois do aviso quando o histórico falha, a extensão
-limpa a sessão local do WhatsApp Web e chama:
-
-```text
-POST /instance/connect
-```
+limpa a sessão local do WhatsApp Web. A extensão não chama `/instance/connect`.
+Se o `finish` retornar `connect_queued=true`, o painel mostra a conexão em
+andamento; se retornar `false`, a importação ainda termina normalmente e o
+backend/watchdog fica responsável por reconectar a instância.
 
 ## Por que enviamos em chunks
 
@@ -311,7 +311,7 @@ Depois da importação, a mesma conta pode ficar ativa em dois lugares:
 
 Isso pode causar desconexões, mensagens perdidas ou comportamento instável.
 
-Por padrão, a extensão limpa a sessão local depois que a API confirma a importação. Em seguida, chama `/instance/connect`.
+Por padrão, a extensão limpa a sessão local depois que a API confirma a importação. A reconexão da instância fica a cargo do backend/watchdog; a extensão não chama `/instance/connect`.
 
 No painel existe a opção técnica de não limpar a sessão local, mas ela deve ser usada apenas para depuração.
 
@@ -555,7 +555,7 @@ Pontos seguros para customizar:
 - limite de chats considerados em `importLimits.historyChatLimit`;
 - payload e autenticação HTTP em `src/background/api.ts`;
 - layout do painel em `src/content/panel/template.ts`;
-- regra de normalização de cliente em `src/shared/url.ts`.
+- regra de normalização do nome da assinatura em `src/shared/url.ts`.
 
 Pontos que exigem mais cuidado:
 

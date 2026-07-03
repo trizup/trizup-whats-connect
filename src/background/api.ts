@@ -180,13 +180,3 @@ export async function uploadHistoryOnlyPayload(serverUrl: string, token: string,
     "Falha ao repassar histórico"
   );
 }
-
-export async function connectImportedInstance(serverUrl: string, token: string): Promise<any> {
-  // After local cleanup, ask the API to connect the newly imported instance.
-  return postJSONWithRetry(
-    `${normalizeBaseUrl(serverUrl)}${API_PATHS.instanceConnect}`,
-    token,
-    {},
-    "Falha ao conectar instância importada"
-  );
-}

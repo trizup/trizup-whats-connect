@@ -67,8 +67,7 @@ export const API_PATHS = {
   importWebSessionStart: EXTENSION_CUSTOMIZATION.api.paths.importWebSessionStart,
   importWebSessionChunk: EXTENSION_CUSTOMIZATION.api.paths.importWebSessionChunk,
   importWebSessionFinish: EXTENSION_CUSTOMIZATION.api.paths.importWebSessionFinish,
-  importWebSessionHistory: EXTENSION_CUSTOMIZATION.api.paths.importWebSessionHistory,
-  instanceConnect: EXTENSION_CUSTOMIZATION.api.paths.instanceConnect
+  importWebSessionHistory: EXTENSION_CUSTOMIZATION.api.paths.importWebSessionHistory
 } as const;
 
 export const WHATSAPP_LOGGED_IN_SELECTORS = [

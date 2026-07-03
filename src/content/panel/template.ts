@@ -1,5 +1,5 @@
 import { EXTENSION_CUSTOMIZATION } from "../../customization";
-import { iconClose, iconEye, iconImport, iconSettings } from "./icons";
+import { iconClose, iconEye, iconImport, iconSettings, iconTrash } from "./icons";
 
 export const PANEL_TEXT = EXTENSION_CUSTOMIZATION.panelText;
 export const PANEL_HOST_ID = "session-connector-panel";
@@ -196,7 +196,7 @@ export function panelTemplate(version: string): string {
       }
 
       .icon-button svg,
-      .token-toggle svg {
+      .token-action svg {
         fill: none;
         height: 18px;
         stroke: currentColor;
@@ -257,10 +257,10 @@ export function panelTemplate(version: string): string {
       }
 
       .token-field input {
-        padding-right: 44px;
+        padding-right: 78px;
       }
 
-      .token-toggle {
+      .token-action {
         align-items: center;
         background: transparent;
         border: 0;
@@ -273,17 +273,29 @@ export function panelTemplate(version: string): string {
         margin: 0;
         padding: 0;
         position: absolute;
-        right: 3px;
         top: 3px;
-        width: 38px;
+        width: 34px;
       }
 
-      .token-toggle:hover,
-      .token-toggle:focus-visible {
+      .token-action:hover,
+      .token-action:focus-visible {
         background: var(--connector-hover);
         box-shadow: 0 0 0 2px var(--connector-focus);
         color: var(--connector-text);
         outline: none;
+      }
+
+      .token-clear {
+        right: 39px;
+      }
+
+      .token-clear:hover,
+      .token-clear:focus-visible {
+        color: var(--connector-danger);
+      }
+
+      .token-toggle {
+        right: 3px;
       }
 
       .token-toggle .eye-off {
@@ -558,8 +570,17 @@ export function panelTemplate(version: string): string {
           <span class="token-field">
             <input id="instanceTokenInput" type="password" autocomplete="off" placeholder="${PANEL_TEXT.tokenPlaceholder}" />
             <button
+              id="tokenClearButton"
+              class="token-action token-clear"
+              type="button"
+              aria-label="${PANEL_TEXT.clearToken}"
+              title="${PANEL_TEXT.clearToken}"
+            >
+              ${iconTrash()}
+            </button>
+            <button
               id="tokenVisibilityButton"
-              class="token-toggle"
+              class="token-action token-toggle"
               type="button"
               aria-label="${PANEL_TEXT.showToken}"
               aria-pressed="false"

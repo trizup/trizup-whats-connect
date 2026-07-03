@@ -16,7 +16,6 @@ import {
 } from "../shared/messages";
 import { normalizeBaseUrl } from "../shared/url";
 import {
-  connectImportedInstance,
   uploadHistoryOnlyPayload,
   uploadWhatsmeowPayload,
   verifyInstanceForImport
@@ -51,6 +50,17 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function scheduleWhatsAppTabReload(tabId) {
+  if (!tabId) {
+    return;
+  }
+  setTimeout(() => {
+    chrome.tabs.reload(tabId, { bypassCache: true }).catch((error) => {
+      console.warn("Failed to reload WhatsApp Web after local cleanup", error);
+    });
+  }, 1000);
+}
+
 function historyImportSummary(result, payload) {
   return `histórico repassado: contatos=${result.contacts || payload.contacts.length}, perfis=${result.contactProfiles || 0}, store=${result.storeContacts || 0}, chats=${result.historyChats || payload.history.chats?.length || 0}, mensagens=${result.historyMsgs || payload.history.messages?.length || 0}, mappings=${result.lidMappings || 0}`;
 }
@@ -58,8 +68,7 @@ function historyImportSummary(result, payload) {
 function importSummaryText(result, importPayload, includeHistory, cleanup, connectResult, historyImport) {
   const imported = result.imported || {};
   const cleanupWarning = cleanup && cleanup.error ? "; limpeza local falhou: " + cleanup.error : "";
-  const connectWarning = connectResult && connectResult.error ? "; conexão API não iniciada: " + connectResult.error : "";
-  const connectNote = connectResult && !connectResult.error ? "; conexão API solicitada" : "";
+  const connectNote = connectResult?.queued ? "; conexão em andamento" : "";
   const historyNote = !includeHistory
     ? "; histórico ignorado"
     : historyImport?.error
@@ -67,7 +76,7 @@ function importSummaryText(result, importPayload, includeHistory, cleanup, conne
       : historyImport?.message
         ? "; " + historyImport.message
         : "; histórico não repassado";
-  return "Importação concluída" + historyNote + cleanupWarning + connectWarning + connectNote + ". jid=" + (result.jid || importPayload.device?.meJid || "n/a") + ", contatos=" + (imported.contacts || 0) + ", chunks=" + (result.chunks || 0);
+  return "Importação concluída" + historyNote + cleanupWarning + connectNote + ". jid=" + (result.jid || importPayload.device?.meJid || "n/a") + ", contatos=" + (imported.contacts || 0) + ", chunks=" + (result.chunks || 0);
 }
 
 function sessionDumpCompleteness(dump) {
@@ -102,7 +111,7 @@ function userFacingErrorMessage(error) {
     return message;
   }
   if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
-    return "Falha de rede ao falar com a API. Confira cliente/domínio, conexão e permissões da extensão.";
+    return "Falha de rede ao conectar. Confira o nome da assinatura, a conexão e as permissões da extensão.";
   }
   if (message.includes("Falha ao enviar chunk")) {
     return `${message}. A importação foi interrompida antes da finalização.`;
@@ -183,7 +192,7 @@ async function runFloatingImport(tab, options, onStatus) {
     const includeHistory = options?.includeHistory === undefined ? DEFAULT_INCLUDE_HISTORY : options?.includeHistory === true;
     const disconnectLocal = options?.disconnectLocal !== false;
     if (!client || !token) {
-      throw new Error("Informe cliente e token da instância");
+      throw new Error("Informe o nome da assinatura e o token");
     }
 
     const serverUrl = normalizeBaseUrl(client);
@@ -233,7 +242,7 @@ async function runFloatingImport(tab, options, onStatus) {
       onStatus({ message: "Importação concluída. Desconectando WhatsApp Web local...", kind: "ok" });
       try {
         cleanup = await clearWhatsAppWebLocalSessionFromTab(tab);
-        onStatus({ message: "Aguardando encerramento da sessão local..." });
+        onStatus({ message: "Aguardando limpeza local..." });
         await sleep(1200);
       } catch (cleanupError) {
         cleanup = { error: cleanupError.message || "Falha ao limpar dados locais do WhatsApp Web" };
@@ -243,14 +252,12 @@ async function runFloatingImport(tab, options, onStatus) {
 
     let connectResult = null;
     if (disconnectLocal && !(cleanup && cleanup.error)) {
-      onStatus({ message: "Conectando instância na API..." });
-      try {
-        connectResult = await connectImportedInstance(serverUrl, token);
-      } catch (connectError) {
-        connectResult = { error: connectError.message || "Falha ao conectar instância importada" };
-        console.warn("Imported WhatsApp session was not connected automatically", connectError);
+      if (result.connect_queued === true) {
+        connectResult = { queued: true };
+        onStatus({ message: "Conexão da instância em andamento.", kind: "ok" });
       }
     }
+    const kind = historyImport?.error ? "warn" : "ok";
 
     return {
       message: importSummaryText(result, importPayload, includeHistory, cleanup, connectResult, historyImport),
@@ -259,7 +266,8 @@ async function runFloatingImport(tab, options, onStatus) {
       connect: connectResult,
       history: historyImport,
       includeHistory,
-      kind: historyImport?.error ? "warn" : "ok",
+      kind,
+      reloadWhatsAppTab: disconnectLocal && !(cleanup && cleanup.error),
       losses: converted.losses
     };
   } finally {
@@ -278,7 +286,7 @@ async function runHistoryOnlyImport(tab, options, onStatus) {
   const client = String(options?.client || "").trim();
   const token = String(options?.token || "").trim();
   if (!client || !token) {
-    throw new Error("Informe cliente e token da instância");
+    throw new Error("Informe o nome da assinatura e o token");
   }
   const serverUrl = normalizeBaseUrl(client);
   await chrome.storage.local.set({
@@ -370,6 +378,9 @@ chrome.runtime.onConnect.addListener((port) => {
     runner
       .then((payload) => {
         postToPort(port, { type: PORT_MESSAGE_TYPES.done, kind: payload.kind || "ok", message: payload.message, payload });
+        if (payload.reloadWhatsAppTab) {
+          scheduleWhatsAppTabReload(tab?.id);
+        }
       })
       .catch((error) => {
         console.warn("Session connector command failed", error);

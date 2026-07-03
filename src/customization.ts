@@ -2,7 +2,7 @@
  * Fork-friendly customization surface.
  *
  * For most APIs, start here:
- * - Change `api.clientBaseDomain` if "cliente" should resolve to another domain.
+ * - Change `api.clientBaseDomain` if the subscription name should resolve to another domain.
  * - Change `api.paths` if your backend uses different routes.
  * - Change `api.authHeaderName` if you use Authorization/Bearer instead of token.
  * - Change `panelText` to rebrand the floating panel without touching logic.
@@ -17,8 +17,7 @@ export const EXTENSION_CUSTOMIZATION = {
       importWebSessionStart: "/instance/import-web-session/start",
       importWebSessionChunk: "/instance/import-web-session/chunk",
       importWebSessionFinish: "/instance/import-web-session/finish",
-      importWebSessionHistory: "/instance/import-web-session/history",
-      instanceConnect: "/instance/connect"
+      importWebSessionHistory: "/instance/import-web-session/history"
     }
   },
   importLimits: {
@@ -43,9 +42,9 @@ export const EXTENSION_CUSTOMIZATION = {
     title: "Migrar sessão",
     defaultStatus: "WhatsApp Web conectado",
     loggedOutStatus: "Entre no WhatsApp Web para importar",
-    clientLabel: "Cliente",
-    clientPlaceholder: "cliente",
-    tokenLabel: "Token da instância",
+    clientLabel: "Nome da assinatura",
+    clientPlaceholder: "ex: minha-loja",
+    tokenLabel: "Token",
     tokenPlaceholder: "token",
     importButton: "Migrar sessão",
     diagnoseButton: "Baixar diagnóstico",
@@ -57,12 +56,13 @@ export const EXTENSION_CUSTOMIZATION = {
     modeTechnical: "Modo técnico",
     showToken: "Mostrar token",
     hideToken: "Ocultar token",
+    clearToken: "Apagar token",
     closePanel: "Fechar painel",
     openSettings: "Configurações",
     closeSettings: "Fechar configurações",
     settingsTitle: "Configurações",
     autoOpenSetting: "Abrir painel automaticamente",
-    autoOpenSettingHint: "Mesmo desativado, links com cliente/token na URL sempre abrem o painel.",
+    autoOpenSettingHint: "Mesmo desativado, links com assinatura/token na URL sempre abrem o painel.",
     themeSetting: "Tema do painel",
     themeFollowWhatsApp: "Seguir WhatsApp",
     themeLight: "Claro",
@@ -71,7 +71,7 @@ export const EXTENSION_CUSTOMIZATION = {
     saveTokenSettingHint: "Desative para preencher o token manualmente a cada importação.",
     includeHistory: "Incluir histórico de mensagens (beta)",
     disconnectLocal: "Apagar a sessão local após importar",
-    cleanupNoticeHTML: "<strong>Atenção:</strong> esta sessão será conectada na instância informada e desconectada deste navegador.",
+    cleanupNoticeHTML: "<strong>Atenção:</strong> esta sessão será migrada para a assinatura informada e desconectada deste navegador.",
     keepLocalSessionWarningHTML: "<strong>Risco:</strong> manter a sessão neste navegador e na instância ao mesmo tempo roda a mesma conta em dois lugares, o que pode causar desconexões, perda de mensagens e outros bugs. Use apenas para depuração.",
     extensionInvalidated: "A extensão foi atualizada ou recarregada. Recarregue esta aba do WhatsApp Web e tente novamente."
   }

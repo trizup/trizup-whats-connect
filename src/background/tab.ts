@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { WHATSAPP_LOGGED_IN_SELECTORS, WHATSAPP_QR_HINTS } from "../shared/config";
+import { IMPORT_HISTORY_CHAT_LIMIT, WHATSAPP_LOGGED_IN_SELECTORS, WHATSAPP_QR_HINTS } from "../shared/config";
 import { clearWhatsAppWebLocalSessionData } from "./page-scripts/clear-local-session";
 import { extractWhatsAppWebSidecarDump } from "./page-scripts/extract-history";
 import { extractWhatsAppWebMainDump } from "./page-scripts/extract-session";
@@ -58,8 +58,11 @@ export async function extractInventoryFromTab(tabId) {
   return result.result.inventory;
 }
 
-export async function extractSidecarFromTab(tabId) {
-  const [result] = await executeScriptInPage(tabId, extractWhatsAppWebSidecarDump);
+export async function extractSidecarFromTab(tabId, options = {}) {
+  const [result] = await executeScriptInPage(tabId, extractWhatsAppWebSidecarDump, [{
+    historyChatLimit: IMPORT_HISTORY_CHAT_LIMIT,
+    ...options
+  }]);
   if (!result || !result.result) {
     throw new Error("Não foi possível capturar o histórico");
   }
@@ -94,6 +97,5 @@ export async function clearWhatsAppWebLocalSessionFromTab(tab) {
   if (result.result.error) {
     throw new Error(result.result.error);
   }
-  await chrome.tabs.reload(tab.id, { bypassCache: true });
   return result.result.summary || { method: "page" };
 }
