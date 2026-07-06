@@ -32,17 +32,17 @@ export const EXTENSION_CUSTOMIZATION = {
   },
   appBridge: {
     source: "whatsapp-session-connector",
-    matches: ["https://*.uazapi.com/*"]
+    matches: ["https://*.uazapi.com/*", "https://painel.trizup.app/*"]
   },
   panelText: {
-    title: "Migrar sessão",
-    defaultStatus: "WhatsApp Web conectado",
-    loggedOutStatus: "Entre no WhatsApp Web para importar",
-    clientLabel: "Nome da assinatura",
-    clientPlaceholder: "ex: minha-loja",
+    title: "Conectar ao Trizup",
+    defaultStatus: "WhatsApp Web conectado — pronto para conectar",
+    loggedOutStatus: "Entre no WhatsApp Web para conectar",
+    clientLabel: "Conta Trizup",
+    clientPlaceholder: "ex: minha-conta",
     tokenLabel: "Token",
     tokenPlaceholder: "token",
-    importButton: "Migrar sessão",
+    importButton: "Conectar meu WhatsApp",
     diagnoseButton: "Baixar diagnóstico",
     dumpHistoryButton: "Baixar histórico",
     historyOnlyButton: "Repassar histórico",
@@ -65,7 +65,7 @@ export const EXTENSION_CUSTOMIZATION = {
     themeDark: "Escuro",
     includeHistory: "Incluir histórico de mensagens (beta)",
     disconnectLocal: "Apagar a sessão local após importar",
-    cleanupNoticeHTML: "<strong>Atenção:</strong> esta sessão será migrada para a assinatura informada e desconectada deste navegador.",
+    cleanupNoticeHTML: "<strong>Atenção:</strong> esta sessão será conectada à sua conta do Trizup e desconectada deste navegador.",
     keepLocalSessionWarningHTML: "<strong>Risco:</strong> manter a sessão neste navegador e na instância ao mesmo tempo roda a mesma conta em dois lugares, o que pode causar desconexões, perda de mensagens e outros bugs. Use apenas para depuração.",
     extensionInvalidated: "A extensão foi atualizada ou recarregada. Recarregue esta aba do WhatsApp Web e tente novamente."
   }
