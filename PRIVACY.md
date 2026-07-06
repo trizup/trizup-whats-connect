@@ -88,7 +88,7 @@ ocorrer apenas em computadores confiáveis e com instâncias autorizadas.
 ## Contato
 
 Para dúvidas sobre esta política ou sobre o funcionamento da extensão, use o
-e-mail agenciaispark@gmail.com.
+e-mail suporte@trizup.app.
 
 ## Aviso
 
